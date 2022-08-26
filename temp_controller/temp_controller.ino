@@ -3,7 +3,7 @@
 #include <DallasTemperature.h> // (!!!! DIGITAL SENSOR !!!!)
 
 // Definir variables
-#define SensorInput_GPIO 8 
+#define SensorInput_GPIO 7  
 #define OutputPWM_GPIO 9  
 #define pwmRes 12   
 #define pwmMax 4095 
@@ -40,7 +40,9 @@ boolean newData = false;
 
 void control(void){
   // Measurement, Control, Output Command Signal, Serial Data Communication
+
   unsigned long currentMillis = millis(); // Update current time from the beginning
+
   if (currentMillis - previousMillis >= Ts) {
     previousMillis = currentMillis;
     TempSensor.requestTemperatures();  tempF = TempSensor.getTempCByIndex(0); 
@@ -48,18 +50,66 @@ void control(void){
     float CmdLim = min(max(Cmd, 0), Uunits); // Saturated Control Output
     pwmDuty = int((CmdLim/Uunits)*pwmMax);
     analogWriteADJ(OutputPWM_GPIO, pwmDuty);
-    
-  
+
     Serial.print("Cmd:");
     Serial.print(Cmd);
     Serial.print(",");
-
     Serial.print("tempF:");
     Serial.println(tempF);     
   }
 
 
 
+  // Advanced Serial Input Functions
+  recvWithStartEndMarkers();  
+  if (newData == true) {
+    parseData();
+    newData = false;
+  }
+  
+}
+
+void ident(void){
+  // Measurement, Control, Output Command Signal, Serial Data Communication
+
+  unsigned long currentMillis = millis(); // Update current time from the beginning
+
+  if (currentMillis - previousMillis >= Ts ) {
+    previousMillis = currentMillis;
+    TempSensor.requestTemperatures();  tempF = TempSensor.getTempCByIndex(0); 
+    float Cmd = directCmd;   
+    float CmdLim = min(max(Cmd, 0), Uunits); // Saturated Control Output
+    pwmDuty = int((CmdLim/Uunits)*pwmMax);
+    analogWriteADJ(OutputPWM_GPIO, pwmDuty); 
+
+    if (currentMillis >= 60000 && currentMillis-previousMillis2 >= 30000) {
+    i++;
+    previousMillis2 = currentMillis; // refresh the last time you RUN
+    if (up){
+      directCmd = 55.0;
+      up = false;
+    } else {
+      directCmd = 45.0;
+      up = true;
+    }
+  }
+  if (i >= 5){ 
+    while (true){
+      analogWriteADJ(OutputPWM_GPIO, 0);
+    }
+  }
+
+    //Serial.print("curr:");
+    //Serial.print(currentMillis/1000);
+    //Serial.print(",");
+    Serial.print("Cmd:");
+    Serial.println(Cmd);
+    //Serial.print(",");
+    //Serial.print("tempF:");
+    //Serial.println(tempF);  
+
+  }
+  
   // Advanced Serial Input Functions
   recvWithStartEndMarkers();  
   if (newData == true) {
@@ -92,7 +142,7 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  control();
+  ident();
 }
 
 /* Configure digital pins 9 and 10 as 12-bit PWM outputs (3905 Hz). */
