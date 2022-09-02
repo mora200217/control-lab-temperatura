@@ -51,11 +51,11 @@ void control(void){
     pwmDuty = int((CmdLim/Uunits)*pwmMax);
     analogWriteADJ(OutputPWM_GPIO, pwmDuty);
 
-    Serial.print("Cmd:");
+    Serial.println("Cmd:");
     Serial.print(Cmd);
     Serial.print(",");
     Serial.print("tempF:");
-    Serial.println(tempF);     
+    Serial.print(tempF);     
   }
 
 
@@ -82,7 +82,7 @@ void ident(void){
     pwmDuty = int((CmdLim/Uunits)*pwmMax);
     analogWriteADJ(OutputPWM_GPIO, pwmDuty); 
 
-    if (currentMillis >= 60000 && currentMillis-previousMillis2 >= 30000) {
+    if (currentMillis >= 1620000 && currentMillis-previousMillis2 >= 30000) {
     i++;
     previousMillis2 = currentMillis; // refresh the last time you RUN
     if (up){
@@ -102,11 +102,11 @@ void ident(void){
     //Serial.print("curr:");
     //Serial.print(currentMillis/1000);
     //Serial.print(",");
-    Serial.print("Cmd:");
-    Serial.println(Cmd);
-    //Serial.print(",");
-    //Serial.print("tempF:");
-    //Serial.println(tempF);  
+    Serial.println("Cmd:");
+    Serial.print(Cmd);
+    Serial.print(",");
+    Serial.print("tempF:");
+    Serial.print(tempF);  
 
   }
   
